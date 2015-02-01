@@ -36,6 +36,8 @@ Iterator::Iterator (
   , int          limit
   , bool         keyAsBuffer
   , bool         valueAsBuffer
+  , bool         startIsExclusive
+  , bool         endIsExclusive
 ) : database(database)
   , id(id)
   , start(start)
@@ -46,6 +48,8 @@ Iterator::Iterator (
   , limit(limit)
   , keyAsBuffer(keyAsBuffer)
   , valueAsBuffer(valueAsBuffer)
+  , startIsExclusive(startIsExclusive)
+  , endIsExclusive(endIsExclusive)
 {
   count     = 0;
   started   = false;
@@ -87,11 +91,21 @@ int Iterator::Next (MDB_val *key, MDB_val *value) {
       key->mv_data = (void*)start->data();
       key->mv_size = start->length();
       rc = mdb_cursor_get(cursor, key, value, MDB_SET_RANGE);
-      if (reverse) {
-        if (rc == MDB_NOTFOUND)
-          rc = mdb_cursor_get(cursor, key, value, MDB_LAST);
-        else if (rc == 0 && compare(start, key))
+      
+      if (rc == MDB_NOTFOUND) {
+        rc = mdb_cursor_get(cursor, key, value, reverse ? MDB_LAST : MDB_FIRST);
+      } else if (rc == 0) {
+        // when iterating in reverse:
+        //   - 'lt'  always backs up one key
+        //   - 'lte' backs up if the current key isn't equal to the start key
+        if (reverse && (startIsExclusive || compare(start, key) != 0)) {
           rc = mdb_cursor_get(cursor, key, value, MDB_PREV);
+        }
+        // when iterating forward:
+        //   - 'gt' advances one key if the current key is equal to the start key
+        else if (!reverse && startIsExclusive && compare(start, key) == 0) {
+          rc = mdb_cursor_get(cursor, key, value, MDB_NEXT);
+        }
       }
     } else if (reverse) {
       rc = mdb_cursor_get(cursor, key, value, MDB_LAST);
@@ -119,11 +133,10 @@ int Iterator::Next (MDB_val *key, MDB_val *value) {
   //if (end != NULL)
     //std::cerr << "***end=" << end->c_str() << ", " << reverse << ", " << compare(end, key) << std::endl;
 
-  // 'end' here is an inclusive test
   if ((limit < 0 || ++count <= limit)
       && (end == NULL
-          || (reverse && compare(end, key) <= 0)
-          || (!reverse && compare(end, key) >= 0))) {
+          || (reverse && compare(end, key) < (endIsExclusive ? 0 : 1))
+          || (!reverse && compare(end, key) > (endIsExclusive ? 0 : -1)))) {
     return 0; // good to continue
   }
 
@@ -385,15 +398,18 @@ NAN_METHOD(Iterator::New) {
 
   v8::Local<v8::Object> optionsObj;
 
+  bool startIsExclusive = false;
+  bool endIsExclusive = false;
+  
   if (args.Length() > 1 && args[2]->IsObject()) {
     optionsObj = v8::Local<v8::Object>::Cast(args[2]);
 
-    if (optionsObj->Has(NanNew("start"))
-        && (node::Buffer::HasInstance(optionsObj->Get(NanNew("start")))
-          || optionsObj->Get(NanNew("start"))->IsString())) {
+    if (optionsObj->Has(NanNew("gte"))
+        && (node::Buffer::HasInstance(optionsObj->Get(NanNew("gte")))
+          || optionsObj->Get(NanNew("gte"))->IsString())) {
 
       v8::Local<v8::Value> startBuffer =
-          NanNew(optionsObj->Get(NanNew("start")));
+          NanNew(optionsObj->Get(NanNew("gte")));
 
       // ignore start if it has size 0 since a Slice can't have length 0
       if (StringOrBufferLength(startBuffer) > 0) {
@@ -401,13 +417,32 @@ NAN_METHOD(Iterator::New) {
         start = new std::string((const char*)_start.mv_data, _start.mv_size);
       }
     }
+ 
+    if (optionsObj->Has(NanNew("gt"))
+        && (node::Buffer::HasInstance(optionsObj->Get(NanNew("gt")))
+          || optionsObj->Get(NanNew("gt"))->IsString())) {
 
-    if (optionsObj->Has(NanNew("end"))
-        && (node::Buffer::HasInstance(optionsObj->Get(NanNew("end")))
-          || optionsObj->Get(NanNew("end"))->IsString())) {
+      if (start != NULL) {
+        return NanThrowError("Only one of 'gt' or 'gte' is allowed");
+      }
+ 
+      v8::Local<v8::Value> startBuffer =
+          NanNew(optionsObj->Get(NanNew("gt")));
+
+      // ignore start if it has size 0 since a Slice can't have length 0
+      if (StringOrBufferLength(startBuffer) > 0) {
+        NL_STRING_OR_BUFFER_TO_MDVAL(_start, startBuffer, start)
+        start = new std::string((const char*)_start.mv_data, _start.mv_size);
+        startIsExclusive = true;
+      }
+    }
+    
+    if (optionsObj->Has(NanNew("lte"))
+        && (node::Buffer::HasInstance(optionsObj->Get(NanNew("lte")))
+          || optionsObj->Get(NanNew("lte"))->IsString())) {
 
       v8::Local<v8::Value> endBuffer =
-          NanNew(optionsObj->Get(NanNew("end")));
+          NanNew(optionsObj->Get(NanNew("lte")));
 
       // ignore end if it has size 0 since a Slice can't have length 0
       if (StringOrBufferLength(endBuffer) > 0) {
@@ -415,7 +450,26 @@ NAN_METHOD(Iterator::New) {
         end = new std::string((const char*)_end.mv_data, _end.mv_size);
       }
     }
+    
+    if (optionsObj->Has(NanNew("lt"))
+        && (node::Buffer::HasInstance(optionsObj->Get(NanNew("lt")))
+          || optionsObj->Get(NanNew("lt"))->IsString())) {
 
+      if (end != NULL) {
+        return NanThrowError("Only one of 'lt' or 'lte' is allowed");
+      }
+ 
+      v8::Local<v8::Value> endBuffer =
+          NanNew(optionsObj->Get(NanNew("lt")));
+
+      // ignore end if it has size 0 since a Slice can't have length 0
+      if (StringOrBufferLength(endBuffer) > 0) {
+        NL_STRING_OR_BUFFER_TO_MDVAL(_end, endBuffer, end)
+        end = new std::string((const char*)_end.mv_data, _end.mv_size);
+        endIsExclusive = true;
+      }
+    }
+ 
     if (!optionsObj.IsEmpty() && optionsObj->Has(NanNew("limit"))) {
       limit =
         v8::Local<v8::Integer>::Cast(optionsObj->Get(NanNew("limit")))->Value();
@@ -435,6 +489,15 @@ NAN_METHOD(Iterator::New) {
     , "valueAsBuffer"
     , false
   );
+  
+  if (reverse) {
+    std::string *tmpKey = start;
+    start = end;
+    end = tmpKey;
+    bool tmpExclusive = startIsExclusive;
+    startIsExclusive = endIsExclusive;
+    endIsExclusive = tmpExclusive;
+  }
 
   Iterator* iterator = new Iterator(
       database
@@ -447,6 +510,8 @@ NAN_METHOD(Iterator::New) {
     , limit
     , keyAsBuffer
     , valueAsBuffer
+    , startIsExclusive
+    , endIsExclusive
   );
   iterator->Wrap(args.This());
 

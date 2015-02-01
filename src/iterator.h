@@ -38,6 +38,8 @@ public:
     , int          limit
     , bool         keyAsBuffer
     , bool         valueAsBuffer
+    , bool         startIsExclusive
+    , bool         endIsExclusive
   );
 
   ~Iterator ();
@@ -63,6 +65,8 @@ private:
 public:
   bool         keyAsBuffer;
   bool         valueAsBuffer;
+  bool         startIsExclusive;
+  bool         endIsExclusive;
   bool         started;
   bool         nexting;
   bool         ended;
