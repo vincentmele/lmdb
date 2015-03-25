@@ -175,4 +175,50 @@ static inline void DisposeStringOrBufferFromMDVal(
   to.mv_data = to ## Ch_;                                                      \
   to.mv_size = to ## Sz_;
 
+//////////////
+//////////////
+
+// RWI: NEW SYNC FUNCTIONALITY
+
+//////////////
+//////////////
+
+/* NL_METHOD_SETUP_SYNC setup the following objects:
+ *  - Database* database
+ *  - v8::Local<v8::Object> optionsObj (may be empty)
+ *  - v8::Persistent<v8::Function> callback (won't be empty)
+ * Will NL_THROW_RETURN if there isn't a callback in arg 0 or 1
+ */
+#define NL_METHOD_SETUP_SYNC(name, optionPos)                                   \
+  nlmdb::Database* database =                                                   \
+    node::ObjectWrap::Unwrap<nlmdb::Database>(args.This());                     \
+  v8::Local<v8::Object> optionsObj;                                             \
+  if (optionPos != -1 && args[optionPos]->IsObject()) {                       \
+    optionsObj = v8::Local<v8::Object>::Cast(args[optionPos]);                  \
+  }
+  
+// NOTE: must call DisposeStringOrBufferFromMDVal() on objects created here
+#define NL_STRING_OR_BUFFER_TO_MDVAL_SYNC(to, from, name)                      \
+  size_t to ## Sz_;                                                            \
+  char* to ## Ch_;                                                             \
+  if (node::Buffer::HasInstance(from->ToObject())) {                           \
+    to ## Sz_ = node::Buffer::Length(from->ToObject());                        \
+    to ## Ch_ = node::Buffer::Data(from->ToObject());                          \
+  } else {                                                                     \
+    v8::Local<v8::String> to ## Str = from->ToString();                        \
+    to ## Sz_ = to ## Str->Utf8Length();                                       \
+    to ## Ch_ = new char[to ## Sz_];                                           \
+    to ## Str->WriteUtf8(                                                      \
+        to ## Ch_                                                              \
+      , -1                                                                     \
+      , NULL                                                                   \
+      , v8::String::NO_NULL_TERMINATION                                        \
+    );                                                                         \
+  }                                                                            \
+  MDB_val to;                                                                  \
+  to.mv_data = to ## Ch_;                                                      \
+  to.mv_size = to ## Sz_;
+
+
 #endif
+

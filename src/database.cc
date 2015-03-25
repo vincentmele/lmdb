@@ -283,6 +283,7 @@ void Database::Init () {
   NODE_SET_PROTOTYPE_METHOD(tpl, "del", Database::Delete);
   NODE_SET_PROTOTYPE_METHOD(tpl, "batch", Database::Batch);
   NODE_SET_PROTOTYPE_METHOD(tpl, "iterator", Database::Iterator);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "getSync", Database::GetSync);
 }
 
 NAN_METHOD(Database::New) {
@@ -498,6 +499,28 @@ NAN_METHOD(Database::Get) {
   NanAsyncQueueWorker(worker);
 
   NanReturnUndefined();
+}
+
+NAN_METHOD(Database::GetSync) {
+  NanScope();
+
+  NL_METHOD_SETUP_SYNC(getSync, 1)
+
+  v8::Local<v8::Object> keyHandle = args[0].As<v8::Object>();
+  NL_STRING_OR_BUFFER_TO_MDVAL_SYNC(key, keyHandle, key)
+
+  //std::cerr << "->GETFROMDB(" << (char*)key.mv_data << "(" << key.mv_size << ")" << std::endl;
+
+  MDB_val value;
+  database->GetFromDatabase(key, value);
+
+  bool asBuffer = NanBooleanOptionValue(optionsObj, NanSymbol("asBuffer"), true);
+  if (asBuffer) {
+    NanReturnValue( NanNewBufferHandle((char*)value.mv_data, value.mv_size) );
+  } 
+  else {
+    NanReturnValue( v8::String::New((char*)value.mv_data, value.mv_size) );
+  }
 }
 
 NAN_METHOD(Database::Delete) {
