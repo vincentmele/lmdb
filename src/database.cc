@@ -512,14 +512,19 @@ NAN_METHOD(Database::GetSync) {
   //std::cerr << "->GETFROMDB(" << (char*)key.mv_data << "(" << key.mv_size << ")" << std::endl;
 
   MDB_val value;
-  database->GetFromDatabase(key, value);
+  int rval = database->GetFromDatabase(key, value);
 
-  bool asBuffer = NanBooleanOptionValue(optionsObj, NanSymbol("asBuffer"), true);
-  if (asBuffer) {
-    NanReturnValue( NanNewBufferHandle((char*)value.mv_data, value.mv_size) );
-  } 
+  if (rval) {
+     NanReturnUndefined();
+  }
   else {
-    NanReturnValue( v8::String::New((char*)value.mv_data, value.mv_size) );
+    bool asBuffer = NanBooleanOptionValue(optionsObj, NanSymbol("asBuffer"), true);
+    if (asBuffer) {
+      NanReturnValue( NanNewBufferHandle((char*)value.mv_data, value.mv_size) );
+    } 
+    else {
+      NanReturnValue( v8::String::New((char*)value.mv_data, value.mv_size) );
+    }
   }
 }
 
