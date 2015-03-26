@@ -110,6 +110,7 @@ private:
   static NAN_METHOD(Batch);
   static NAN_METHOD(Iterator);
   static NAN_METHOD(GetSync);
+  static NAN_METHOD(PutSync);
 };
 
 } // namespace nlmdb

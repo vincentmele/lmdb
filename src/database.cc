@@ -185,7 +185,6 @@ int Database::PutToDatabase (std::vector< BatchOp* >* operations) {
       ; it != operations->end()
       ; it++) {
 
-    //printf("BatchOp.Execute()\n");fflush(stdout);
     rc = (*it)->Execute(txn, dbi);
     if (rc) {
       mdb_txn_abort(txn);
@@ -194,7 +193,6 @@ int Database::PutToDatabase (std::vector< BatchOp* >* operations) {
   }
 
   rc = mdb_txn_commit(txn);
-
   return rc;
 }
 
@@ -284,6 +282,7 @@ void Database::Init () {
   NODE_SET_PROTOTYPE_METHOD(tpl, "batch", Database::Batch);
   NODE_SET_PROTOTYPE_METHOD(tpl, "iterator", Database::Iterator);
   NODE_SET_PROTOTYPE_METHOD(tpl, "getSync", Database::GetSync);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "putSync", Database::PutSync);
 }
 
 NAN_METHOD(Database::New) {
@@ -473,6 +472,25 @@ NAN_METHOD(Database::Put) {
   NanAsyncQueueWorker(worker);
 
   NanReturnUndefined();
+}
+
+NAN_METHOD(Database::PutSync) {
+  NanScope();
+
+  NL_METHOD_SETUP_SYNC(putSync, 2)
+
+  v8::Local<v8::Object> keyHandle = args[0].As<v8::Object>();
+  v8::Local<v8::Object> valueHandle = args[1].As<v8::Object>();
+  NL_STRING_OR_BUFFER_TO_MDVAL_SYNC(key, keyHandle, key)
+  NL_STRING_OR_BUFFER_TO_MDVAL_SYNC(value, valueHandle, value)
+
+  int rval = database->PutToDatabase (key,value);
+  if (rval) {
+     NanReturnUndefined();
+  }
+  else {
+    NanReturnUndefined();
+  }
 }
 
 NAN_METHOD(Database::Get) {
