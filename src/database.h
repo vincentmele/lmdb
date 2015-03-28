@@ -111,6 +111,7 @@ private:
   static NAN_METHOD(Iterator);
   static NAN_METHOD(GetSync);
   static NAN_METHOD(PutSync);
+  static NAN_METHOD(DeleteSync);
 };
 
 } // namespace nlmdb

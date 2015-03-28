@@ -283,6 +283,7 @@ void Database::Init () {
   NODE_SET_PROTOTYPE_METHOD(tpl, "iterator", Database::Iterator);
   NODE_SET_PROTOTYPE_METHOD(tpl, "getSync", Database::GetSync);
   NODE_SET_PROTOTYPE_METHOD(tpl, "putSync", Database::PutSync);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "deleteSync", Database::DeleteSync);
 }
 
 NAN_METHOD(Database::New) {
@@ -486,7 +487,7 @@ NAN_METHOD(Database::PutSync) {
 
   int rval = database->PutToDatabase (key,value);
   if (rval) {
-     NanReturnUndefined();
+    NanReturnUndefined();
   }
   else {
     NanReturnUndefined();
@@ -566,6 +567,24 @@ NAN_METHOD(Database::Delete) {
 
   NanReturnUndefined();
 }
+
+NAN_METHOD(Database::DeleteSync) {
+  NanScope();
+
+  NL_METHOD_SETUP_SYNC(getSync, 1)
+
+  v8::Local<v8::Object> keyHandle = args[0].As<v8::Object>();
+  NL_STRING_OR_BUFFER_TO_MDVAL_SYNC(key, keyHandle, key)
+
+  int rval = database->DeleteFromDatabase(key);
+  if (rval) {
+    NanReturnUndefined();
+  }
+  else {
+    NanReturnUndefined();
+  }
+}
+
 
 NAN_METHOD(Database::Batch) {
   NanScope();
