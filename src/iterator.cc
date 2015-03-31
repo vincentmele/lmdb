@@ -174,6 +174,35 @@ NAN_METHOD(Iterator::Next) {
   NanReturnValue(args.Holder());
 }
 
+NAN_METHOD(Iterator::NextValSync) {
+  NanScope();
+
+  Iterator* iterator = node::ObjectWrap::Unwrap<Iterator>(args.This());
+
+  if (iterator->ended) {
+    NanReturnUndefined();
+  }
+
+  MDB_val key;
+  MDB_val value;
+  int rval = iterator->Next(&key, &value);
+
+  if (rval) {
+     NanReturnUndefined();
+  }
+  else {
+
+    v8::Local<v8::Value> returnValue;
+    if (iterator->valueAsBuffer) {
+      returnValue = NanNewBufferHandle((char*)value.mv_data, value.mv_size);
+    } else {
+      returnValue = v8::String::New((char*)value.mv_data, value.mv_size);
+    }
+
+    NanReturnValue(returnValue);
+  }
+}
+
 NAN_METHOD(Iterator::End) {
   NanScope();
 
@@ -217,6 +246,8 @@ void Iterator::Init () {
   NanAssignPersistent(v8::FunctionTemplate, iterator_constructor, tpl);
   tpl->SetClassName(NanSymbol("Iterator"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+  NODE_SET_PROTOTYPE_METHOD(tpl, "nextvalsync", Iterator::NextValSync);
   NODE_SET_PROTOTYPE_METHOD(tpl, "next", Iterator::Next);
   NODE_SET_PROTOTYPE_METHOD(tpl, "end", Iterator::End);
 }
