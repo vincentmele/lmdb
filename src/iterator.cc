@@ -232,9 +232,9 @@ NAN_METHOD(Iterator::CurrentKeySync) {
 
     v8::Local<v8::Value> returnKey;
     if (iterator->valueAsBuffer) {
-      returnKey = NanNewBufferHandle((char*)value.mv_data, value.mv_size);
+      returnKey = NanNewBufferHandle((char*)key.mv_data, key.mv_size);
     } else {
-      returnKey = v8::String::New((char*)value.mv_data, value.mv_size);
+      returnKey = v8::String::New((char*)key.mv_data, key.mv_size);
     }
 
     NanReturnValue(returnKey);
