@@ -61,6 +61,15 @@ Iterator::~Iterator () {
     delete end;
 };
 
+int Iterator::Current (MDB_val *key, MDB_val *value) {
+
+  int rc = -1;
+  if (started) {
+    rc = mdb_cursor_get(cursor, key, value, MDB_GET_CURRENT);
+  }
+  return rc;
+}
+
 int Iterator::Next (MDB_val *key, MDB_val *value) {
   //std::cerr << "Iterator::Next " << started << ", " << id << std::endl;
   int rc = 0;
@@ -203,6 +212,35 @@ NAN_METHOD(Iterator::NextValSync) {
   }
 }
 
+NAN_METHOD(Iterator::CurrentKeySync) {
+  NanScope();
+
+  Iterator* iterator = node::ObjectWrap::Unwrap<Iterator>(args.This());
+
+  if (iterator->ended) {
+    NanReturnUndefined();
+  }
+
+  MDB_val key;
+  MDB_val value;
+  int rval = iterator->Current(&key, &value);
+
+  if (rval) {
+     NanReturnUndefined();
+  }
+  else {
+
+    v8::Local<v8::Value> returnKey;
+    if (iterator->valueAsBuffer) {
+      returnKey = NanNewBufferHandle((char*)value.mv_data, value.mv_size);
+    } else {
+      returnKey = v8::String::New((char*)value.mv_data, value.mv_size);
+    }
+
+    NanReturnValue(returnKey);
+  }
+}
+
 NAN_METHOD(Iterator::End) {
   NanScope();
 
@@ -248,6 +286,8 @@ void Iterator::Init () {
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   NODE_SET_PROTOTYPE_METHOD(tpl, "nextvalsync", Iterator::NextValSync);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "currentkeysync", Iterator::CurrentKeySync);
+
   NODE_SET_PROTOTYPE_METHOD(tpl, "next", Iterator::Next);
   NODE_SET_PROTOTYPE_METHOD(tpl, "end", Iterator::End);
 }

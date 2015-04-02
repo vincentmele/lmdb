@@ -43,6 +43,7 @@ public:
   ~Iterator ();
 
   int          Next    (MDB_val *key, MDB_val *value);
+  int          Current    (MDB_val *key, MDB_val *value);
   void         End     ();
   void         Release ();
 
@@ -74,6 +75,7 @@ private:
   static NAN_METHOD(Next);
   static NAN_METHOD(End);
   static NAN_METHOD(NextValSync);
+  static NAN_METHOD(CurrentKeySync);
 };
 
 } // namespace nlmdb
