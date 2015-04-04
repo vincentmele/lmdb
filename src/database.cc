@@ -158,6 +158,9 @@ int Database::PutToDatabase (MDB_val key, MDB_val value) {
     mdb_txn_abort(txn);
     return rc;
   }
+
+  // RWI: MDB_NOOVERWRITE ?? could be used for PutIfNotExists function
+
   rc = mdb_put(txn, dbi, &key, &value, 0);
   if (rc) {
     mdb_txn_abort(txn);
@@ -284,6 +287,8 @@ void Database::Init () {
   NODE_SET_PROTOTYPE_METHOD(tpl, "getSync", Database::GetSync);
   NODE_SET_PROTOTYPE_METHOD(tpl, "putSync", Database::PutSync);
   NODE_SET_PROTOTYPE_METHOD(tpl, "deleteSync", Database::DeleteSync);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "closeSync", Database::CloseSync);
+  // RWI: todo - update the lib and add mdb_reader_check
 }
 
 NAN_METHOD(Database::New) {
@@ -447,6 +452,32 @@ NAN_METHOD(Database::Close) {
   NanReturnUndefined();
 }
 
+NAN_METHOD(Database::CloseSync) {
+  NanScope();
+
+  NL_METHOD_SETUP_SYNC(closeSync,-1)
+
+  if (database->iterators.size() > 0) {
+    // yikes, we still have iterators open! naughty naughty.
+    for (
+        std::map< uint32_t, nlmdb::Iterator * >::iterator it
+            = database->iterators.begin()
+      ; it != database->iterators.end()
+      ; ++it) {
+
+        nlmdb::Iterator *iterator = it->second;
+        if (!iterator->ended) {
+          iterator->End();
+        }
+        //iterator->Release();
+    }
+  }
+
+  database->CloseDatabase();
+  NanReturnUndefined();
+}
+
+
 NAN_METHOD(Database::Put) {
   NanScope();
 
@@ -571,7 +602,7 @@ NAN_METHOD(Database::Delete) {
 NAN_METHOD(Database::DeleteSync) {
   NanScope();
 
-  NL_METHOD_SETUP_SYNC(getSync, 1)
+  NL_METHOD_SETUP_SYNC(deleteSync, 1)
 
   v8::Local<v8::Object> keyHandle = args[0].As<v8::Object>();
   NL_STRING_OR_BUFFER_TO_MDVAL_SYNC(key, keyHandle, key)
