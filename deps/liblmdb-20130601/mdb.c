@@ -283,7 +283,7 @@ typedef MDB_ID	txnid_t;
 	 *	Set this to 1 for copious tracing. Set to 2 to add dumps of all IDLs
 	 *	read from and written to the database (used for free space management).
 	 */
-#define MDB_DEBUG 1
+#define MDB_DEBUG 0
 #endif
 
 #if !(__STDC_VERSION__ >= 199901L || defined(__GNUC__))
@@ -2824,11 +2824,6 @@ mdb_env_create(MDB_env **env)
 int
 mdb_env_set_mapsize(MDB_env *env, size_t size)
 {
-		
-mdb_debug=1;
-DPRINTF("RWI: env->me_mapsize=%lu",size);
-mdb_debug=0;
-
 	if (env->me_map)
 		return EINVAL;
 	env->me_mapsize = size;
