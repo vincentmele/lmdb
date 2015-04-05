@@ -183,7 +183,7 @@ NAN_METHOD(Iterator::Next) {
   NanReturnValue(args.Holder());
 }
 
-NAN_METHOD(Iterator::NextValSync) {
+NAN_METHOD(Iterator::NextSync) {
   NanScope();
 
   Iterator* iterator = node::ObjectWrap::Unwrap<Iterator>(args.This());
@@ -201,18 +201,18 @@ NAN_METHOD(Iterator::NextValSync) {
   }
   else {
 
-    v8::Local<v8::Value> returnValue;
-    if (iterator->valueAsBuffer) {
-      returnValue = NanNewBufferHandle((char*)value.mv_data, value.mv_size);
+    v8::Local<v8::Value> returnKey;
+    if (iterator->keyAsBuffer) {
+      returnKey = NanNewBufferHandle((char*)key.mv_data, key.mv_size);
     } else {
-      returnValue = v8::String::New((char*)value.mv_data, value.mv_size);
+      returnKey = v8::String::New((char*)key.mv_data, key.mv_size);
     }
 
-    NanReturnValue(returnValue);
+    NanReturnValue(returnKey);
   }
 }
 
-NAN_METHOD(Iterator::CurrentKeySync) {
+NAN_METHOD(Iterator::KeySync) {
   NanScope();
 
   Iterator* iterator = node::ObjectWrap::Unwrap<Iterator>(args.This());
@@ -231,13 +231,42 @@ NAN_METHOD(Iterator::CurrentKeySync) {
   else {
 
     v8::Local<v8::Value> returnKey;
-    if (iterator->valueAsBuffer) {
+    if (iterator->keyAsBuffer) {
       returnKey = NanNewBufferHandle((char*)key.mv_data, key.mv_size);
     } else {
       returnKey = v8::String::New((char*)key.mv_data, key.mv_size);
     }
 
     NanReturnValue(returnKey);
+  }
+}
+
+NAN_METHOD(Iterator::ValSync) {
+  NanScope();
+
+  Iterator* iterator = node::ObjectWrap::Unwrap<Iterator>(args.This());
+
+  if (iterator->ended) {
+    NanReturnUndefined();
+  }
+
+  MDB_val key;
+  MDB_val value;
+  int rval = iterator->Current(&key, &value);
+
+  if (rval) {
+     NanReturnUndefined();
+  }
+  else {
+
+    v8::Local<v8::Value> returnVal;
+    if (iterator->valueAsBuffer) {
+      returnVal = NanNewBufferHandle((char*)value.mv_data, value.mv_size);
+    } else {
+      returnVal = v8::String::New((char*)value.mv_data, value.mv_size);
+    }
+
+    NanReturnValue(returnVal);
   }
 }
 
@@ -275,6 +304,28 @@ NAN_METHOD(Iterator::End) {
   NanReturnValue(args.Holder());
 }
 
+NAN_METHOD(Iterator::EndSync) {
+  NanScope();
+
+  Iterator* iterator = node::ObjectWrap::Unwrap<Iterator>(args.This());
+  //std::cerr << "Iterator::End" << iterator->id << ", " << iterator->nexting << ", " << iterator->ended << std::endl;
+
+  if (iterator->ended) {
+    NanReturnUndefined();
+  }
+
+  iterator->ended = true;
+  if (iterator->nexting) {
+    printf("nlmdb::ERROR: EndSync - still nexting\n");
+    NanReturnUndefined();
+  }
+
+  iterator->End();
+  iterator->Release();
+
+  NanReturnUndefined();
+}
+
 static v8::Persistent<v8::FunctionTemplate> iterator_constructor;
 
 void Iterator::Init () {
@@ -285,8 +336,10 @@ void Iterator::Init () {
   tpl->SetClassName(NanSymbol("Iterator"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-  NODE_SET_PROTOTYPE_METHOD(tpl, "nextvalsync", Iterator::NextValSync);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "currentkeysync", Iterator::CurrentKeySync);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "nextsync", Iterator::NextSync);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "keysync", Iterator::KeySync);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "valsync", Iterator::ValSync);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "endsync", Iterator::EndSync);
 
   NODE_SET_PROTOTYPE_METHOD(tpl, "next", Iterator::Next);
   NODE_SET_PROTOTYPE_METHOD(tpl, "end", Iterator::End);

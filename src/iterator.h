@@ -74,8 +74,10 @@ private:
   static NAN_METHOD(New);
   static NAN_METHOD(Next);
   static NAN_METHOD(End);
-  static NAN_METHOD(NextValSync);
-  static NAN_METHOD(CurrentKeySync);
+  static NAN_METHOD(NextSync);
+  static NAN_METHOD(KeySync);
+  static NAN_METHOD(ValSync);
+  static NAN_METHOD(EndSync);
 };
 
 } // namespace nlmdb
