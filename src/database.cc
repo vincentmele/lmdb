@@ -287,7 +287,10 @@ void Database::Init () {
   NODE_SET_PROTOTYPE_METHOD(tpl, "getSync", Database::GetSync);
   NODE_SET_PROTOTYPE_METHOD(tpl, "putSync", Database::PutSync);
   NODE_SET_PROTOTYPE_METHOD(tpl, "deleteSync", Database::DeleteSync);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "openSync", Database::OpenSync);
   NODE_SET_PROTOTYPE_METHOD(tpl, "closeSync", Database::CloseSync);
+
+
   // RWI: todo - update the lib and add mdb_reader_check
 }
 
@@ -396,7 +399,71 @@ NAN_METHOD(Database::Open) {
   );
 
   NanAsyncQueueWorker(worker);
+  NanReturnUndefined();
+}
 
+NAN_METHOD(Database::OpenSync) {
+  NanScope();
+
+  NL_METHOD_SETUP_SYNC(openSync,0)
+
+  OpenOptions options;
+
+  options.createIfMissing = NanBooleanOptionValue(
+      optionsObj
+    , NanSymbol("createIfMissing")
+    , true
+  );
+  options.errorIfExists = NanBooleanOptionValue(
+      optionsObj
+    , NanSymbol("errorIfExists")
+  , false);
+  options.mapSize = UInt64OptionValue(
+      optionsObj
+    , NanSymbol("mapSize")
+    , DEFAULT_MAPSIZE
+  );
+  options.maxReaders = UInt64OptionValue(
+      optionsObj
+    , NanSymbol("maxReaders")
+    , DEFAULT_READERS
+  );
+  options.sync = NanBooleanOptionValue(
+      optionsObj
+    , NanSymbol("sync")
+  , DEFAULT_SYNC);
+  options.readOnly = NanBooleanOptionValue(
+      optionsObj
+    , NanSymbol("readOnly")
+    , DEFAULT_READONLY
+  );
+  options.writeMap = NanBooleanOptionValue(
+      optionsObj
+    , NanSymbol("writeMap")
+    , DEFAULT_READONLY
+  );
+  options.metaSync = NanBooleanOptionValue(
+      optionsObj
+    , NanSymbol("metaSync")
+    , DEFAULT_METASYNC
+  );
+  options.mapAsync = NanBooleanOptionValue(
+      optionsObj
+    , NanSymbol("mapAsync")
+    , DEFAULT_MAPASYNC
+  );
+  options.fixedMap = NanBooleanOptionValue(
+      optionsObj
+    , NanSymbol("fixedMap")
+    , DEFAULT_FIXEDMAP
+  );
+  options.metaSync = NanBooleanOptionValue(
+      optionsObj
+    , NanSymbol("notls")
+    , DEFAULT_NOTLS
+  );
+
+  database->OpenDatabase(options);
   NanReturnUndefined();
 }
 
