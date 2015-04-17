@@ -12,6 +12,10 @@
 #include "batch.h"
 #include "iterator.h"
 
+// RWI
+#include "nlmdb.h"
+//
+
 #include <string.h>
 
 namespace nlmdb {
@@ -584,6 +588,10 @@ NAN_METHOD(Database::PutSync) {
   NL_STRING_OR_BUFFER_TO_MDVAL_SYNC(value, valueHandle, value)
 
   int rval = database->PutToDatabase (key,value);
+
+  DisposeStringOrBufferFromMDVal(keyHandle, key);
+  DisposeStringOrBufferFromMDVal(valueHandle, value);
+
   if (rval) {
     NanReturnUndefined();
   }
@@ -675,6 +683,8 @@ NAN_METHOD(Database::DeleteSync) {
   NL_STRING_OR_BUFFER_TO_MDVAL_SYNC(key, keyHandle, key)
 
   int rval = database->DeleteFromDatabase(key);
+  DisposeStringOrBufferFromMDVal(keyHandle, key);
+
   if (rval) {
     NanReturnUndefined();
   }
