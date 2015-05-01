@@ -1,13 +1,13 @@
 {
     'targets': [{
         'target_name': 'nlmdb'
+      , 'dependencies': [
+            '<(module_root_dir)/deps/liblmdb.gyp:liblmdb'
+        ]
       , 'include_dirs' : [
-          '<!(node -p -e "require(\'path\').dirname(require.resolve(\'nan\'))")'
-        ],
-        "libraries": [
-          "/usr/lib/x86_64-linux-gnu/liblmdb.a" 
-        ],
-     'sources': [
+            '<!(node -p -e "require(\'path\').dirname(require.resolve(\'nan\'))")'
+        ]
+      , 'sources': [
             'src/nlmdb.cc'
           , 'src/database.cc'
           , 'src/database_async.cc'
