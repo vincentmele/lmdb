@@ -3,15 +3,15 @@
     'target_name': 'nlmdb',
     'include_dirs' : [
       '<!(node -p -e "require(\'path\').dirname(require.resolve(\'nan\'))")',
-      "/usr/lib/x86_64-linux-gnu",
       "/usr/local/include",
     ],
     'library_dirs' : [
+      "/usr/lib/x86_64-linux-gnu",
       "/usr/local/lib",
     ],
 
     "libraries": [
-      "liblmdb.a"
+      "-llmdb"
     ],
     'sources': [
       'src/nlmdb.cc',
