@@ -666,7 +666,7 @@ NAN_METHOD(Database::GetSync) {
       NanReturnValue( NanNewBufferHandle((char*)value.mv_data, value.mv_size) );
     } 
     else {
-      NanReturnValue( v8::String::New((char*)value.mv_data, value.mv_size) );
+      NanReturnValue( NanNew<v8::String>((char*)value.mv_data, value.mv_size) );
     }
   }
 }
