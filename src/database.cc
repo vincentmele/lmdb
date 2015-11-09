@@ -11,7 +11,6 @@
 #include "database_async.h"
 #include "batch.h"
 #include "iterator.h"
-#include "common.h"
 
 // RWI
 #include "nlmdb.h"
