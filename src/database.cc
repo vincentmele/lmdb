@@ -419,55 +419,55 @@ NAN_METHOD(Database::OpenSync) {
 
   options.createIfMissing = NanBooleanOptionValue(
       optionsObj
-    , NanSymbol("createIfMissing")
+    , NanNew("createIfMissing")
     , true
   );
   options.errorIfExists = NanBooleanOptionValue(
       optionsObj
-    , NanSymbol("errorIfExists")
+    , NanNew("errorIfExists")
   , false);
   options.mapSize = UInt64OptionValue(
       optionsObj
-    , NanSymbol("mapSize")
+    , NanNew("mapSize")
     , DEFAULT_MAPSIZE
   );
   options.maxReaders = UInt64OptionValue(
       optionsObj
-    , NanSymbol("maxReaders")
+    , NanNew("maxReaders")
     , DEFAULT_READERS
   );
   options.sync = NanBooleanOptionValue(
       optionsObj
-    , NanSymbol("sync")
+    , NanNew("sync")
   , DEFAULT_SYNC);
   options.readOnly = NanBooleanOptionValue(
       optionsObj
-    , NanSymbol("readOnly")
+    , NanNew("readOnly")
     , DEFAULT_READONLY
   );
   options.writeMap = NanBooleanOptionValue(
       optionsObj
-    , NanSymbol("writeMap")
+    , NanNew("writeMap")
     , DEFAULT_READONLY
   );
   options.metaSync = NanBooleanOptionValue(
       optionsObj
-    , NanSymbol("metaSync")
+    , NanNew("metaSync")
     , DEFAULT_METASYNC
   );
   options.mapAsync = NanBooleanOptionValue(
       optionsObj
-    , NanSymbol("mapAsync")
+    , NanNew("mapAsync")
     , DEFAULT_MAPASYNC
   );
   options.fixedMap = NanBooleanOptionValue(
       optionsObj
-    , NanSymbol("fixedMap")
+    , NanNew("fixedMap")
     , DEFAULT_FIXEDMAP
   );
   options.metaSync = NanBooleanOptionValue(
       optionsObj
-    , NanSymbol("notls")
+    , NanNew("notls")
     , DEFAULT_NOTLS
   );
 
@@ -661,7 +661,7 @@ NAN_METHOD(Database::GetSync) {
      NanReturnUndefined();
   }
   else {
-    bool asBuffer = NanBooleanOptionValue(optionsObj, NanSymbol("asBuffer"), true);
+    bool asBuffer = NanBooleanOptionValue(optionsObj, NanNew("asBuffer"), true);
     if (asBuffer) {
       NanReturnValue( NanNewBufferHandle((char*)value.mv_data, value.mv_size) );
     } 
