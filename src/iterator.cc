@@ -205,7 +205,7 @@ NAN_METHOD(Iterator::NextSync) {
     if (iterator->keyAsBuffer) {
       returnKey = NanNewBufferHandle((char*)key.mv_data, key.mv_size);
     } else {
-      returnKey = v8::String::New((char*)key.mv_data, key.mv_size);
+      returnKey =  NanNew<v8::String>((char*)key.mv_data, key.mv_size);
     }
 
     NanReturnValue(returnKey);
@@ -234,7 +234,7 @@ NAN_METHOD(Iterator::KeySync) {
     if (iterator->keyAsBuffer) {
       returnKey = NanNewBufferHandle((char*)key.mv_data, key.mv_size);
     } else {
-      returnKey = v8::String::New((char*)key.mv_data, key.mv_size);
+      returnKey =  NanNew<v8::String>((char*)key.mv_data, key.mv_size);
     }
 
     NanReturnValue(returnKey);
@@ -263,7 +263,7 @@ NAN_METHOD(Iterator::ValSync) {
     if (iterator->valueAsBuffer) {
       returnVal = NanNewBufferHandle((char*)value.mv_data, value.mv_size);
     } else {
-      returnVal = v8::String::New((char*)value.mv_data, value.mv_size);
+      returnVal =  NanNew<v8::String>((char*)value.mv_data, value.mv_size);
     }
 
     NanReturnValue(returnVal);
