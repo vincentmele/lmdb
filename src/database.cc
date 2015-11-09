@@ -11,6 +11,7 @@
 #include "database_async.h"
 #include "batch.h"
 #include "iterator.h"
+#include "common.h"
 
 // RWI
 #include "nlmdb.h"
@@ -342,14 +343,14 @@ NAN_METHOD(Database::Open) {
 
   OpenOptions options;
 
-  options.createIfMissing = NanBooleanOptionValue(
+  options.createIfMissing = BooleanOptionValue(
       optionsObj
-    , NanNew("createIfMissing")
+    , "createIfMissing"
     , true
   );
-  options.errorIfExists = NanBooleanOptionValue(
+  options.errorIfExists = BooleanOptionValue(
       optionsObj
-    , NanNew("errorIfExists")
+    , "errorIfExists"
   , false);
   options.mapSize = UInt64OptionValue(
       optionsObj
@@ -361,38 +362,38 @@ NAN_METHOD(Database::Open) {
     , NanNew("maxReaders")
     , DEFAULT_READERS
   );
-  options.sync = NanBooleanOptionValue(
+  options.sync = BooleanOptionValue(
       optionsObj
-    , NanNew("sync")
+    , "sync"
   , DEFAULT_SYNC);
-  options.readOnly = NanBooleanOptionValue(
+  options.readOnly = BooleanOptionValue(
       optionsObj
-    , NanNew("readOnly")
+    , "readOnly"
     , DEFAULT_READONLY
   );
-  options.writeMap = NanBooleanOptionValue(
+  options.writeMap = BooleanOptionValue(
       optionsObj
-    , NanNew("writeMap")
+    , "writeMap"
     , DEFAULT_READONLY
   );
-  options.metaSync = NanBooleanOptionValue(
+  options.metaSync = BooleanOptionValue(
       optionsObj
-    , NanNew("metaSync")
+    , "metaSync"
     , DEFAULT_METASYNC
   );
-  options.mapAsync = NanBooleanOptionValue(
+  options.mapAsync = BooleanOptionValue(
       optionsObj
-    , NanNew("mapAsync")
+    , "mapAsync"
     , DEFAULT_MAPASYNC
   );
-  options.fixedMap = NanBooleanOptionValue(
+  options.fixedMap = BooleanOptionValue(
       optionsObj
-    , NanNew("fixedMap")
+    , "fixedMap"
     , DEFAULT_FIXEDMAP
   );
-  options.metaSync = NanBooleanOptionValue(
+  options.metaSync = BooleanOptionValue(
       optionsObj
-    , NanNew("notls")
+    , "notls"
     , DEFAULT_NOTLS
   );
 
@@ -417,14 +418,14 @@ NAN_METHOD(Database::OpenSync) {
 
   OpenOptions options;
 
-  options.createIfMissing = NanBooleanOptionValue(
+  options.createIfMissing = BooleanOptionValue(
       optionsObj
-    , NanNew("createIfMissing")
+    , "createIfMissing"
     , true
   );
-  options.errorIfExists = NanBooleanOptionValue(
+  options.errorIfExists = BooleanOptionValue(
       optionsObj
-    , NanNew("errorIfExists")
+    , "errorIfExists"
   , false);
   options.mapSize = UInt64OptionValue(
       optionsObj
@@ -436,38 +437,38 @@ NAN_METHOD(Database::OpenSync) {
     , NanNew("maxReaders")
     , DEFAULT_READERS
   );
-  options.sync = NanBooleanOptionValue(
+  options.sync = BooleanOptionValue(
       optionsObj
-    , NanNew("sync")
+    , "sync"
   , DEFAULT_SYNC);
-  options.readOnly = NanBooleanOptionValue(
+  options.readOnly = BooleanOptionValue(
       optionsObj
-    , NanNew("readOnly")
+    , "readOnly"
     , DEFAULT_READONLY
   );
-  options.writeMap = NanBooleanOptionValue(
+  options.writeMap = BooleanOptionValue(
       optionsObj
-    , NanNew("writeMap")
+    , "writeMap"
     , DEFAULT_READONLY
   );
-  options.metaSync = NanBooleanOptionValue(
+  options.metaSync = BooleanOptionValue(
       optionsObj
-    , NanNew("metaSync")
+    , "metaSync"
     , DEFAULT_METASYNC
   );
-  options.mapAsync = NanBooleanOptionValue(
+  options.mapAsync = BooleanOptionValue(
       optionsObj
-    , NanNew("mapAsync")
+    , "mapAsync"
     , DEFAULT_MAPASYNC
   );
-  options.fixedMap = NanBooleanOptionValue(
+  options.fixedMap = BooleanOptionValue(
       optionsObj
-    , NanNew("fixedMap")
+    , "fixedMap"
     , DEFAULT_FIXEDMAP
   );
-  options.metaSync = NanBooleanOptionValue(
+  options.metaSync = BooleanOptionValue(
       optionsObj
-    , NanNew("notls")
+    , "notls"
     , DEFAULT_NOTLS
   );
 
@@ -625,7 +626,7 @@ NAN_METHOD(Database::Get) {
 
   //std::cerr << "->GETFROMDB(" << (char*)key.mv_data << "(" << key.mv_size << ")" << std::endl;
 
-  bool asBuffer = NanBooleanOptionValue(optionsObj, NanNew("asBuffer"), true);
+  bool asBuffer = BooleanOptionValue(optionsObj, "asBuffer", true);
 
   ReadWorker* worker = new ReadWorker(
       database
@@ -661,7 +662,7 @@ NAN_METHOD(Database::GetSync) {
      NanReturnUndefined();
   }
   else {
-    bool asBuffer = NanBooleanOptionValue(optionsObj, NanNew("asBuffer"), true);
+    bool asBuffer = BooleanOptionValue(optionsObj, "asBuffer", true);
     if (asBuffer) {
       NanReturnValue( NanNewBufferHandle((char*)value.mv_data, value.mv_size) );
     } 

@@ -422,17 +422,17 @@ NAN_METHOD(Iterator::New) {
     }
   }
 
-  bool reverse = NanBooleanOptionValue(optionsObj, NanNew("reverse"), false);
-  bool keys = NanBooleanOptionValue(optionsObj, NanNew("keys"), true);
-  bool values = NanBooleanOptionValue(optionsObj, NanNew("values"), true);
-  bool keyAsBuffer = NanBooleanOptionValue(
+  bool reverse = BooleanOptionValue(optionsObj, "reverse", false );
+  bool keys = BooleanOptionValue(optionsObj, "keys", true);
+  bool values = BooleanOptionValue(optionsObj, "values", true);
+  bool keyAsBuffer = BooleanOptionValue(
       optionsObj
-    , NanNew("keyAsBuffer")
+    , "keyAsBuffer"
     , true
   );
-  bool valueAsBuffer = NanBooleanOptionValue(
+  bool valueAsBuffer = BooleanOptionValue(
       optionsObj
-    , NanNew("valueAsBuffer")
+    , "valueAsBuffer"
     , false
   );
 

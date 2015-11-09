@@ -33,12 +33,15 @@ static inline size_t StringOrBufferLength(v8::Local<v8::Value> obj) {
 }
 
 static inline bool BooleanOptionValue(
-      v8::Local<v8::Object> optionsObj
-    , v8::Handle<v8::String> opt) {
+	v8::Local<v8::Object> options,
+        const char* _key,
+        bool def = false) {
 
-  return !optionsObj.IsEmpty()
-    && optionsObj->Has(opt)
-    && optionsObj->Get(opt)->BooleanValue();
+  v8::Handle<v8::String> key = NanNew(_key);
+  return !options.IsEmpty()
+    && options->Has(key)
+    ? options->Get(key)->BooleanValue()
+    : def;
 }
 
 static inline bool BooleanOptionValueDefTrue(
@@ -50,17 +53,18 @@ static inline bool BooleanOptionValueDefTrue(
     || optionsObj->Get(opt)->BooleanValue();
 }
 
-static inline uint32_t UInt32OptionValue(
-      v8::Local<v8::Object> optionsObj
-    , v8::Handle<v8::String> opt
-    , uint32_t def) {
-
-  return !optionsObj.IsEmpty()
-    && optionsObj->Has(opt)
-    && optionsObj->Get(opt)->IsUint32()
-      ? optionsObj->Get(opt)->Uint32Value()
-      : def;
+static inline uint32_t UInt32OptionValue(v8::Local<v8::Object> options,
+                                      const char* _key,
+                                      uint32_t def) {
+  v8::Handle<v8::String> key = NanNew(_key);
+  return !options.IsEmpty()
+    && options->Has(key)
+    && options->Get(key)->IsNumber()
+    ? options->Get(key)->Uint32Value()
+    : def;
 }
+
+
 
 static inline uint64_t UInt64OptionValue(
       v8::Local<v8::Object> optionsObj
