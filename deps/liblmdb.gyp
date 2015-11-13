@@ -1,7 +1,7 @@
 {
     'targets': [{
         'target_name': 'liblmdb'
-      , 'defines': [ 'MDB_DEBUG=0' ]
+      , 'defines': [ 'MDB_DEBUG=1' ]
       , 'type': 'static_library'
       , 'standalone_static_library': 1
       , 'direct_dependent_settings': {
@@ -12,11 +12,8 @@
       , 'conditions': [
             ['OS == "linux"', {
                 'cflags': [
-                    '-march=native'
-                  , '-O2'
-                  , '-Waddress'
+                  '-Waddress'
                   , '-Wno-unused-but-set-variable'
-                  , '-fomit-frame-pointer'
                 ]
             }]
         ]
