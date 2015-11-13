@@ -94,11 +94,11 @@ static inline uint64_t UInt64OptionValue(
   return Nan::ThrowError(msg);
 
 #define NL_RUN_CALLBACK(callback, argv, length)                                \
-  v8::TryCatch try_catch;                                                      \
+  Nan::TryCatch try_catch;                                                      \
   Nan::MakeCallback(                                                             \
     Nan::GetCurrentContext()->Global(), callback, length, argv);                 \
   if (try_catch.HasCaught()) {                                                 \
-    node::FatalException(try_catch);                                           \
+    Nan::FatalException(try_catch);                                           \
   }
 
 

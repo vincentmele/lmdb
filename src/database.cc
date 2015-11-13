@@ -513,10 +513,10 @@ NAN_METHOD(Database::Close) {
           v8::Local<v8::Value> argv[] = {
               Nan::New<v8::FunctionTemplate>()->GetFunction() // empty callback
           };
-          v8::TryCatch try_catch;
+          Nan::TryCatch try_catch;
           end->Call(iterator->handle(), 1, argv);
           if (try_catch.HasCaught()) {
-            node::FatalException(try_catch);
+            Nan::FatalException(try_catch);
           }
         }
     }
@@ -775,14 +775,14 @@ NAN_METHOD(Database::Iterator) {
   // each iterator gets a unique id for this Database, so we can
   // easily store & lookup on our `iterators` map
   uint32_t id = database->currentIteratorId++;
-  v8::TryCatch try_catch;
+  Nan::TryCatch try_catch;
   v8::Handle<v8::Object> iteratorHandle = Iterator::NewInstance(
       info.This()
     , Nan::New(id)
     , optionsObj
   );
   if (try_catch.HasCaught()) {
-    node::FatalException(try_catch);
+    Nan::FatalException(try_catch);
   }
 
   nlmdb::Iterator *iterator =
