@@ -16,7 +16,7 @@ namespace nlmdb {
 
 NextWorker::NextWorker (
     Iterator* iterator
-  , NanCallback *callback
+  , Nan::Callback *callback
   , void (*localCallback)(Iterator*)
 ) : AsyncWorker(NULL, callback)
   , iterator(iterator)
@@ -32,7 +32,7 @@ void NextWorker::Execute () {
 }
 
 void NextWorker::WorkComplete () {
-  NanScope();
+  Nan::HandleScope scope;
 
   if (status.code == MDB_NOTFOUND || (status.code == 0 && status.error.length() == 0))
     HandleOKCallback();
@@ -41,7 +41,7 @@ void NextWorker::WorkComplete () {
 }
 
 void NextWorker::HandleOKCallback () {
-  NanScope();
+  Nan::HandleScope scope;
 
 //std::cerr << "NextWorker::HandleOKCallback: " << iterator->id << std::endl;
 //std::cerr << "Read [" << std::string((char*)key.mv_data, key.mv_size) << "]=[" << std::string((char*)value.mv_data, value.mv_size) << "]\n";
@@ -55,16 +55,16 @@ void NextWorker::HandleOKCallback () {
 
   v8::Local<v8::Value> returnKey;
   if (iterator->keyAsBuffer) {
-    returnKey = NanNewBufferHandle((char*)key.mv_data, key.mv_size);
+    returnKey = Nan::NewBuffer((char*)key.mv_data, key.mv_size).ToLocalChecked();
   } else {
-    returnKey = NanNew((char*)key.mv_data, key.mv_size);
+    returnKey = Nan::New<v8::String>((char*)key.mv_data, key.mv_size).ToLocalChecked();
   }
 
   v8::Local<v8::Value> returnValue;
   if (iterator->valueAsBuffer) {
-    returnValue = NanNewBufferHandle((char*)value.mv_data, value.mv_size);
+    returnValue = Nan::NewBuffer((char*)value.mv_data, value.mv_size).ToLocalChecked();
   } else {
-    returnValue = NanNew((char*)value.mv_data, value.mv_size);
+    returnValue = Nan::New<v8::String>((char*)value.mv_data, value.mv_size).ToLocalChecked();
   }
 
   // clean up & handle the next/end state see iterator.cc/checkEndCallback
@@ -72,7 +72,7 @@ void NextWorker::HandleOKCallback () {
   localCallback(iterator);
 
   v8::Local<v8::Value> argv[] = {
-      NanNull()
+      Nan::Null()
     , returnKey
     , returnValue
   };
@@ -84,7 +84,7 @@ void NextWorker::HandleOKCallback () {
 
 EndWorker::EndWorker (
     Iterator* iterator
-  , NanCallback *callback
+  , Nan::Callback *callback
 ) : AsyncWorker(NULL, callback)
   , iterator(iterator)
 {executed=false;};

@@ -35,7 +35,7 @@ protected:
   MDB_val value;
 };
 
-class WriteBatch : public node::ObjectWrap {
+class WriteBatch : public Nan::ObjectWrap {
  public:
   static void Init();
   static v8::Handle<v8::Value> NewInstance (

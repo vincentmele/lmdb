@@ -15,7 +15,7 @@ namespace nlmdb {
 
 OpenWorker::OpenWorker (
     Database* database
-  , NanCallback *callback
+  , Nan::Callback *callback
   , OpenOptions options
 ) : AsyncWorker(database, callback)
   , options(options)
@@ -31,7 +31,7 @@ void OpenWorker::Execute () {
 
 CloseWorker::CloseWorker (
     Database* database
-  , NanCallback *callback
+  , Nan::Callback *callback
 ) : AsyncWorker(database, callback)
 {};
 
@@ -43,7 +43,7 @@ void CloseWorker::Execute () {
 
 void CloseWorker::WorkComplete () {
 /*
-  NanScope();
+  Nan::HandleScope scope;
   HandleOKCallback();
 */
   AsyncWorker::WorkComplete();
@@ -52,13 +52,13 @@ void CloseWorker::WorkComplete () {
 /** IO WORKER (abstract) **/
 IOWorker::IOWorker (
     Database* database
-  , NanCallback *callback
+  , Nan::Callback *callback
   , MDB_val key
   , v8::Local<v8::Object> &keyHandle
 ) : AsyncWorker(database, callback)
   , key(key)
 {
-  NanScope();
+  Nan::HandleScope scope;
 
   SaveToPersistent("key", keyHandle);
 };
@@ -66,7 +66,7 @@ IOWorker::IOWorker (
 IOWorker::~IOWorker () {}
 
 void IOWorker::WorkComplete () {
-  NanScope();
+  Nan::HandleScope scope;
 
   DisposeStringOrBufferFromMDVal(GetFromPersistent("key"), key);
   AsyncWorker::WorkComplete();
@@ -75,7 +75,7 @@ void IOWorker::WorkComplete () {
 /** READ WORKER **/
 ReadWorker::ReadWorker (
     Database* database
-  , NanCallback *callback
+  , Nan::Callback *callback
   , MDB_val key
   , bool asBuffer
   , v8::Local<v8::Object> &keyHandle
@@ -90,15 +90,15 @@ void ReadWorker::Execute () {
 }
 
 void ReadWorker::HandleOKCallback () {
-  NanScope();
+  Nan::HandleScope scope;
   v8::Local<v8::Value> returnValue;
   if (asBuffer) {
-    returnValue = NanNewBufferHandle((char*)value.mv_data, value.mv_size);
+    returnValue = Nan::NewBuffer((char*)value.mv_data, value.mv_size).ToLocalChecked();
   } else {
-    returnValue = NanNew((char*)value.mv_data, value.mv_size);
+    returnValue = Nan::New((char*)value.mv_data, value.mv_size).ToLocalChecked();
   }
   v8::Local<v8::Value> argv[] = {
-      NanNull()
+      Nan::Null()
     , returnValue
   };
   callback->Call(2, argv);
@@ -107,7 +107,7 @@ void ReadWorker::HandleOKCallback () {
 /** DELETE WORKER **/
 DeleteWorker::DeleteWorker (
     Database* database
-  , NanCallback *callback
+  , Nan::Callback *callback
   , MDB_val key
   , v8::Local<v8::Object> &keyHandle
 ) : IOWorker(database, callback, key, keyHandle)
@@ -120,7 +120,7 @@ void DeleteWorker::Execute () {
 }
 
 void DeleteWorker::WorkComplete () {
-  NanScope();
+  Nan::HandleScope scope;
 
   if (status.code == MDB_NOTFOUND || (status.code == 0 && status.error.length() == 0))
     HandleOKCallback();
@@ -136,7 +136,7 @@ void DeleteWorker::WorkComplete () {
 /** WRITE WORKER **/
 WriteWorker::WriteWorker (
     Database* database
-  , NanCallback *callback
+  , Nan::Callback *callback
   , MDB_val key
   , MDB_val value
   , v8::Local<v8::Object> &keyHandle
@@ -145,7 +145,7 @@ WriteWorker::WriteWorker (
   , value(value)
   , valueHandle(valueHandle)
 {
-  NanScope();
+  Nan::HandleScope scope;
 
   SaveToPersistent("value", valueHandle);
 };
@@ -157,7 +157,7 @@ void WriteWorker::Execute () {
 }
 
 void WriteWorker::WorkComplete () {
-  NanScope();
+  Nan::HandleScope scope;
 
   DisposeStringOrBufferFromMDVal(GetFromPersistent("value"), value);
   IOWorker::WorkComplete();

@@ -13,15 +13,15 @@ namespace nlmdb {
 
 class Database;
 
-/* abstract */ class AsyncWorker : public NanAsyncWorker {
+/* abstract */ class AsyncWorker : public Nan::AsyncWorker {
 public:
   AsyncWorker (
       nlmdb::Database* database
-    , NanCallback *callback
-  ) : NanAsyncWorker(callback), database(database) {
-    NanScope();
-    v8::Local<v8::Object> obj = NanNew<v8::Object>();
-    NanAssignPersistent(persistentHandle, obj);
+    , Nan::Callback *callback
+  ) : Nan::AsyncWorker(callback), database(database) {
+    Nan::HandleScope scope;
+    v8::Local<v8::Object> obj = Nan::New<v8::Object>();
+    persistentHandle.Reset(obj);
   }
 
 protected:

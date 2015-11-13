@@ -161,21 +161,21 @@ void Iterator::Release () {
 void checkEndCallback (Iterator* iterator) {
   iterator->nexting = false;
   if (iterator->endWorker != NULL) {
-    NanAsyncQueueWorker(iterator->endWorker);
+    Nan::AsyncQueueWorker(iterator->endWorker);
     iterator->endWorker = NULL;
   }
 }
 
 NAN_METHOD(Iterator::Next) {
-  NanScope();
+  Nan::HandleScope scope;
 
-  Iterator* iterator = node::ObjectWrap::Unwrap<Iterator>(args.This());
+  Iterator* iterator = Nan::ObjectWrap::Unwrap<Iterator>(info.This());
 
-  if (args.Length() == 0 || !args[0]->IsFunction()) {
-    return NanThrowError("next() requires a callback argument");
+  if (info.Length() == 0 || !info[0]->IsFunction()) {
+    return Nan::ThrowError("next() requires a callback argument");
   }
 
-  v8::Local<v8::Function> callback = args[0].As<v8::Function>();
+  v8::Local<v8::Function> callback = info[0].As<v8::Function>();
 
   if (iterator->ended) {
     NL_RETURN_CALLBACK_OR_ERROR(callback, "cannot call next() after end()")
@@ -187,22 +187,22 @@ NAN_METHOD(Iterator::Next) {
 
   NextWorker* worker = new NextWorker(
       iterator
-    , new NanCallback(callback)
+    , new Nan::Callback(callback)
     , checkEndCallback
   );
   iterator->nexting = true;
-  NanAsyncQueueWorker(worker);
+  Nan::AsyncQueueWorker(worker);
 
-  NanReturnValue(args.Holder());
+  info.GetReturnValue().Set(info.Holder());
 }
 
 NAN_METHOD(Iterator::NextSync) {
-  NanScope();
+  Nan::HandleScope scope;
 
-  Iterator* iterator = node::ObjectWrap::Unwrap<Iterator>(args.This());
+  Iterator* iterator = Nan::ObjectWrap::Unwrap<Iterator>(info.This());
 
   if (iterator->ended) {
-    NanReturnUndefined();
+    return;
   }
 
   MDB_val key;
@@ -210,28 +210,28 @@ NAN_METHOD(Iterator::NextSync) {
   int rval = iterator->Next(&key, &value);
 
   if (rval) {
-     NanReturnUndefined();
+     return;
   }
   else {
 
     v8::Local<v8::Value> returnKey;
     if (iterator->keyAsBuffer) {
-      returnKey = NanNewBufferHandle((char*)key.mv_data, key.mv_size);
+      returnKey = Nan::NewBuffer((char*)key.mv_data, key.mv_size).ToLocalChecked();
     } else {
-      returnKey =  NanNew<v8::String>((char*)key.mv_data, key.mv_size);
+      returnKey =  Nan::New<v8::String>((char*)key.mv_data, key.mv_size).ToLocalChecked();
     }
 
-    NanReturnValue(returnKey);
+    info.GetReturnValue().Set(returnKey);
   }
 }
 
 NAN_METHOD(Iterator::KeySync) {
-  NanScope();
+  Nan::HandleScope scope;
 
-  Iterator* iterator = node::ObjectWrap::Unwrap<Iterator>(args.This());
+  Iterator* iterator = Nan::ObjectWrap::Unwrap<Iterator>(info.This());
 
   if (iterator->ended) {
-    NanReturnUndefined();
+    return;
   }
 
   MDB_val key;
@@ -239,28 +239,28 @@ NAN_METHOD(Iterator::KeySync) {
   int rval = iterator->Current(&key, &value);
 
   if (rval) {
-     NanReturnUndefined();
+     return;
   }
   else {
 
     v8::Local<v8::Value> returnKey;
     if (iterator->keyAsBuffer) {
-      returnKey = NanNewBufferHandle((char*)key.mv_data, key.mv_size);
+      returnKey = Nan::NewBuffer((char*)key.mv_data, key.mv_size).ToLocalChecked();
     } else {
-      returnKey =  NanNew<v8::String>((char*)key.mv_data, key.mv_size);
+      returnKey =  Nan::New<v8::String>((char*)key.mv_data, key.mv_size).ToLocalChecked();
     }
 
-    NanReturnValue(returnKey);
+    info.GetReturnValue().Set(returnKey);
   }
 }
 
 NAN_METHOD(Iterator::ValSync) {
-  NanScope();
+  Nan::HandleScope scope;
 
-  Iterator* iterator = node::ObjectWrap::Unwrap<Iterator>(args.This());
+  Iterator* iterator = Nan::ObjectWrap::Unwrap<Iterator>(info.This());
 
   if (iterator->ended) {
-    NanReturnUndefined();
+    return;
   }
 
   MDB_val key;
@@ -268,32 +268,32 @@ NAN_METHOD(Iterator::ValSync) {
   int rval = iterator->Current(&key, &value);
 
   if (rval) {
-     NanReturnUndefined();
+     return;
   }
   else {
 
     v8::Local<v8::Value> returnVal;
     if (iterator->valueAsBuffer) {
-      returnVal = NanNewBufferHandle((char*)value.mv_data, value.mv_size);
+      returnVal = Nan::NewBuffer((char*)value.mv_data, value.mv_size).ToLocalChecked();
     } else {
-      returnVal =  NanNew<v8::String>((char*)value.mv_data, value.mv_size);
+      returnVal =  Nan::New<v8::String>((char*)value.mv_data, value.mv_size).ToLocalChecked();
     }
 
-    NanReturnValue(returnVal);
+    info.GetReturnValue().Set(returnVal);
   }
 }
 
 NAN_METHOD(Iterator::End) {
-  NanScope();
+  Nan::HandleScope scope;
 
-  Iterator* iterator = node::ObjectWrap::Unwrap<Iterator>(args.This());
+  Iterator* iterator = Nan::ObjectWrap::Unwrap<Iterator>(info.This());
   //std::cerr << "Iterator::End" << iterator->id << ", " << iterator->nexting << ", " << iterator->ended << std::endl;
 
-  if (args.Length() == 0 || !args[0]->IsFunction()) {
-    return NanThrowError("end() requires a callback argument");
+  if (info.Length() == 0 || !info[0]->IsFunction()) {
+    return Nan::ThrowError("end() requires a callback argument");
   }
 
-  v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[0]);
+  v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(info[0]);
 
   if (iterator->ended) {
     NL_RETURN_CALLBACK_OR_ERROR(callback, "end() already called on iterator")
@@ -301,7 +301,7 @@ NAN_METHOD(Iterator::End) {
 
   EndWorker* worker = new EndWorker(
       iterator
-    , new NanCallback(callback)
+    , new Nan::Callback(callback)
   );
   iterator->ended = true;
 
@@ -311,81 +311,79 @@ NAN_METHOD(Iterator::End) {
     iterator->endWorker = worker;
   } else {
     //std::cerr << "Iterator can be ended: " << iterator->id << std::endl;
-    NanAsyncQueueWorker(worker);
+    Nan::AsyncQueueWorker(worker);
   }
 
-  NanReturnValue(args.Holder());
+  info.GetReturnValue().Set(info.Holder());
 }
 
 NAN_METHOD(Iterator::EndSync) {
-  NanScope();
+  Nan::HandleScope scope;
 
-  Iterator* iterator = node::ObjectWrap::Unwrap<Iterator>(args.This());
+  Iterator* iterator = Nan::ObjectWrap::Unwrap<Iterator>(info.This());
   //std::cerr << "Iterator::End" << iterator->id << ", " << iterator->nexting << ", " << iterator->ended << std::endl;
 
   if (iterator->ended) {
-    NanReturnUndefined();
+    return;
   }
 
   iterator->ended = true;
   if (iterator->nexting) {
     printf("nlmdb::ERROR: EndSync - still nexting\n");
-    NanReturnUndefined();
+    return;
   }
 
   iterator->End();
   iterator->Release();
 
-  NanReturnUndefined();
+  return;
 }
 
-static v8::Persistent<v8::FunctionTemplate> iterator_constructor;
+static Nan::Persistent<v8::FunctionTemplate> iterator_constructor;
 
 void Iterator::Init () {
-  NanScope();
 
-  v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(Iterator::New);
-  NanAssignPersistent(iterator_constructor, tpl);
-  tpl->SetClassName(NanNew("Iterator"));
+  v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(Iterator::New);
+  iterator_constructor.Reset(tpl);
+  tpl->SetClassName(Nan::New("Iterator").ToLocalChecked());
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-  NODE_SET_PROTOTYPE_METHOD(tpl, "nextsync", Iterator::NextSync);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "keysync", Iterator::KeySync);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "valsync", Iterator::ValSync);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "endsync", Iterator::EndSync);
+  Nan::SetPrototypeMethod(tpl, "nextsync", Iterator::NextSync);
+  Nan::SetPrototypeMethod(tpl, "keysync", Iterator::KeySync);
+  Nan::SetPrototypeMethod(tpl, "valsync", Iterator::ValSync);
+  Nan::SetPrototypeMethod(tpl, "endsync", Iterator::EndSync);
 
-  NODE_SET_PROTOTYPE_METHOD(tpl, "next", Iterator::Next);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "end", Iterator::End);
+  Nan::SetPrototypeMethod(tpl, "next", Iterator::Next);
+  Nan::SetPrototypeMethod(tpl, "end", Iterator::End);
 }
 
-v8::Handle<v8::Object> Iterator::NewInstance (
-        v8::Handle<v8::Object> database
-      , v8::Handle<v8::Number> id
-      , v8::Handle<v8::Object> optionsObj
+v8::Local<v8::Object> Iterator::NewInstance (
+        v8::Local<v8::Object> database
+      , v8::Local<v8::Number> id
+      , v8::Local<v8::Object> optionsObj
     ) {
 
-  NanEscapableScope();
+  Nan::EscapableHandleScope scope;
 
   v8::Local<v8::Object> instance;
 
   v8::Local<v8::FunctionTemplate> constructorHandle =
-      NanNew(iterator_constructor);
+      Nan::New(iterator_constructor);
 
   if (optionsObj.IsEmpty()) {
-    v8::Handle<v8::Value> argv[] = { database, id };
+    v8::Local<v8::Value> argv[] = { database, id };
     instance = constructorHandle->GetFunction()->NewInstance(2, argv);
   } else {
-    v8::Handle<v8::Value> argv[] = { database, id, optionsObj };
+    v8::Local<v8::Value> argv[] = { database, id, optionsObj };
     instance = constructorHandle->GetFunction()->NewInstance(3, argv);
   }
 
-  return NanEscapeScope(instance);
+  return scope.Escape(instance);
 }
 
 NAN_METHOD(Iterator::New) {
-  NanScope();
 
-  Database* database = node::ObjectWrap::Unwrap<Database>(args[0]->ToObject());
+  Database* database = Nan::ObjectWrap::Unwrap<Database>(info[0]->ToObject());
 
   //TODO: remove this, it's only here to make NL_STRING_OR_BUFFER_TO_MDVAL happy
   v8::Handle<v8::Function> callback;
@@ -394,22 +392,26 @@ NAN_METHOD(Iterator::New) {
   std::string* end = NULL;
   int limit = -1;
 
-  v8::Local<v8::Value> id = args[1];
+  v8::Local<v8::Value> id = info[1];
 
   v8::Local<v8::Object> optionsObj;
+
+  v8::Local<v8::Object> ltHandle;
+  v8::Local<v8::Object> lteHandle;
+  v8::Local<v8::Object> gtHandle;
+  v8::Local<v8::Object> gteHandle;
 
   bool startIsExclusive = false;
   bool endIsExclusive = false;
   
-  if (args.Length() > 1 && args[2]->IsObject()) {
-    optionsObj = v8::Local<v8::Object>::Cast(args[2]);
+  if (info.Length() > 1 && info[2]->IsObject()) {
+    optionsObj = v8::Local<v8::Object>::Cast(info[2]);
 
-    if (optionsObj->Has(NanNew("gte"))
-        && (node::Buffer::HasInstance(optionsObj->Get(NanNew("gte")))
-          || optionsObj->Get(NanNew("gte"))->IsString())) {
+    if (optionsObj->Has(Nan::New("gte").ToLocalChecked())
+        && (node::Buffer::HasInstance(optionsObj->Get(Nan::New("gte").ToLocalChecked()))
+          || optionsObj->Get(Nan::New("gte").ToLocalChecked())->IsString())) {
 
-      v8::Local<v8::Value> startBuffer =
-          NanNew(optionsObj->Get(NanNew("gte")));
+      v8::Local<v8::Value> startBuffer = optionsObj->Get(Nan::New("gte").ToLocalChecked()).As<v8::Object>();
 
       // ignore start if it has size 0 since a Slice can't have length 0
       if (StringOrBufferLength(startBuffer) > 0) {
@@ -418,16 +420,15 @@ NAN_METHOD(Iterator::New) {
       }
     }
  
-    if (optionsObj->Has(NanNew("gt"))
-        && (node::Buffer::HasInstance(optionsObj->Get(NanNew("gt")))
-          || optionsObj->Get(NanNew("gt"))->IsString())) {
+    if (optionsObj->Has(Nan::New("gt").ToLocalChecked())
+        && (node::Buffer::HasInstance(optionsObj->Get(Nan::New("gt").ToLocalChecked()))
+          || optionsObj->Get(Nan::New("gt").ToLocalChecked())->IsString())) {
 
       if (start != NULL) {
-        return NanThrowError("Only one of 'gt' or 'gte' is allowed");
+        return Nan::ThrowError("Only one of 'gt' or 'gte' is allowed");
       }
  
-      v8::Local<v8::Value> startBuffer =
-          NanNew(optionsObj->Get(NanNew("gt")));
+      v8::Local<v8::Value> startBuffer = optionsObj->Get(Nan::New("gt").ToLocalChecked()).As<v8::Object>();
 
       // ignore start if it has size 0 since a Slice can't have length 0
       if (StringOrBufferLength(startBuffer) > 0) {
@@ -437,12 +438,11 @@ NAN_METHOD(Iterator::New) {
       }
     }
     
-    if (optionsObj->Has(NanNew("lte"))
-        && (node::Buffer::HasInstance(optionsObj->Get(NanNew("lte")))
-          || optionsObj->Get(NanNew("lte"))->IsString())) {
+    if (optionsObj->Has(Nan::New("lte").ToLocalChecked())
+        && (node::Buffer::HasInstance(optionsObj->Get(Nan::New("lte").ToLocalChecked()))
+          || optionsObj->Get(Nan::New("lte").ToLocalChecked())->IsString())) {
 
-      v8::Local<v8::Value> endBuffer =
-          NanNew(optionsObj->Get(NanNew("lte")));
+      v8::Local<v8::Value> endBuffer = optionsObj->Get(Nan::New("lte").ToLocalChecked()).As<v8::Object>();
 
       // ignore end if it has size 0 since a Slice can't have length 0
       if (StringOrBufferLength(endBuffer) > 0) {
@@ -451,16 +451,15 @@ NAN_METHOD(Iterator::New) {
       }
     }
     
-    if (optionsObj->Has(NanNew("lt"))
-        && (node::Buffer::HasInstance(optionsObj->Get(NanNew("lt")))
-          || optionsObj->Get(NanNew("lt"))->IsString())) {
+    if (optionsObj->Has(Nan::New("lt").ToLocalChecked())
+        && (node::Buffer::HasInstance(optionsObj->Get(Nan::New("lt").ToLocalChecked()))
+          || optionsObj->Get(Nan::New("lt").ToLocalChecked())->IsString())) {
 
       if (end != NULL) {
-        return NanThrowError("Only one of 'lt' or 'lte' is allowed");
+        return Nan::ThrowError("Only one of 'lt' or 'lte' is allowed");
       }
  
-      v8::Local<v8::Value> endBuffer =
-          NanNew(optionsObj->Get(NanNew("lt")));
+      v8::Local<v8::Value> endBuffer = optionsObj->Get(Nan::New("lt").ToLocalChecked()).As<v8::Object>();
 
       // ignore end if it has size 0 since a Slice can't have length 0
       if (StringOrBufferLength(endBuffer) > 0) {
@@ -470,9 +469,9 @@ NAN_METHOD(Iterator::New) {
       }
     }
  
-    if (!optionsObj.IsEmpty() && optionsObj->Has(NanNew("limit"))) {
+    if (!optionsObj.IsEmpty() && optionsObj->Has(Nan::New("limit").ToLocalChecked())) {
       limit =
-        v8::Local<v8::Integer>::Cast(optionsObj->Get(NanNew("limit")))->Value();
+        v8::Local<v8::Integer>::Cast(optionsObj->Get(Nan::New("limit").ToLocalChecked()))->Value();
     }
   }
 
@@ -513,11 +512,11 @@ NAN_METHOD(Iterator::New) {
     , startIsExclusive
     , endIsExclusive
   );
-  iterator->Wrap(args.This());
+  iterator->Wrap(info.This());
 
   //std::cerr << "New Iterator " << iterator->id << std::endl;
 
-  NanReturnValue(args.This());
+  info.GetReturnValue().Set(info.This());
 }
 
 } // namespace nlmdb

@@ -47,11 +47,11 @@ NAN_METHOD(NLMDB);
   virtual int Execute (MDB_txn *txn, MDB_dbi dbi) =0;
 
  protected:
-  v8::Persistent<v8::Object> persistentHandle;
+  Nan::Persistent<v8::Object> persistentHandle;
   MDB_val key;
 };
 
-class Database : public node::ObjectWrap {
+class Database : public Nan::ObjectWrap {
 public:
   static void Init ();
   static v8::Handle<v8::Value> NewInstance (v8::Local<v8::String> &location);
@@ -87,11 +87,11 @@ private:
   static NAN_METHOD(Delete);
   static NAN_METHOD(Batch);
   static NAN_METHOD(Iterator);
-  static NAN_METHOD(GetSync);
-  static NAN_METHOD(PutSync);
-  static NAN_METHOD(DeleteSync);
-  static NAN_METHOD(OpenSync);
-  static NAN_METHOD(CloseSync);
+//  static NAN_METHOD(GetSync);
+//  static NAN_METHOD(PutSync);
+//  static NAN_METHOD(DeleteSync);
+//  static NAN_METHOD(OpenSync);
+//  static NAN_METHOD(CloseSync);
 };
 
 } // namespace nlmdb
