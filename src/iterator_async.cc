@@ -32,7 +32,6 @@ void NextWorker::Execute () {
 }
 
 void NextWorker::WorkComplete () {
-  Nan::HandleScope scope;
 
   if (status.code == MDB_NOTFOUND || (status.code == 0 && status.error.length() == 0))
     HandleOKCallback();
@@ -41,7 +40,6 @@ void NextWorker::WorkComplete () {
 }
 
 void NextWorker::HandleOKCallback () {
-  Nan::HandleScope scope;
 
 //std::cerr << "NextWorker::HandleOKCallback: " << iterator->id << std::endl;
 //std::cerr << "Read [" << std::string((char*)key.mv_data, key.mv_size) << "]=[" << std::string((char*)value.mv_data, value.mv_size) << "]\n";

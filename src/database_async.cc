@@ -43,7 +43,6 @@ void CloseWorker::Execute () {
 
 void CloseWorker::WorkComplete () {
 /*
-  Nan::HandleScope scope;
   HandleOKCallback();
 */
   AsyncWorker::WorkComplete();
@@ -58,16 +57,12 @@ IOWorker::IOWorker (
 ) : AsyncWorker(database, callback)
   , key(key)
 {
-  Nan::HandleScope scope;
-
   SaveToPersistent("key", keyHandle);
 };
 
 IOWorker::~IOWorker () {}
 
 void IOWorker::WorkComplete () {
-  Nan::HandleScope scope;
-
   DisposeStringOrBufferFromMDVal(GetFromPersistent("key"), key);
   AsyncWorker::WorkComplete();
 }
@@ -90,7 +85,6 @@ void ReadWorker::Execute () {
 }
 
 void ReadWorker::HandleOKCallback () {
-  Nan::HandleScope scope;
   v8::Local<v8::Value> returnValue;
   if (asBuffer) {
     returnValue = Nan::NewBuffer((char*)value.mv_data, value.mv_size).ToLocalChecked();
@@ -120,7 +114,6 @@ void DeleteWorker::Execute () {
 }
 
 void DeleteWorker::WorkComplete () {
-  Nan::HandleScope scope;
 
   if (status.code == MDB_NOTFOUND || (status.code == 0 && status.error.length() == 0))
     HandleOKCallback();
@@ -145,8 +138,6 @@ WriteWorker::WriteWorker (
   , value(value)
   , valueHandle(valueHandle)
 {
-  Nan::HandleScope scope;
-
   SaveToPersistent("value", valueHandle);
 };
 
@@ -157,8 +148,6 @@ void WriteWorker::Execute () {
 }
 
 void WriteWorker::WorkComplete () {
-  Nan::HandleScope scope;
-
   DisposeStringOrBufferFromMDVal(GetFromPersistent("value"), value);
   IOWorker::WorkComplete();
 }

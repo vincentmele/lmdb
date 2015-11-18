@@ -19,7 +19,6 @@ public:
       nlmdb::Database* database
     , Nan::Callback *callback
   ) : Nan::AsyncWorker(callback), database(database) {
-    Nan::HandleScope scope;
     v8::Local<v8::Object> obj = Nan::New<v8::Object>();
     persistentHandle.Reset(obj);
   }

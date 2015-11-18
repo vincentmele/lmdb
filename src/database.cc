@@ -266,8 +266,6 @@ int Database::NewIterator (MDB_txn **txn, MDB_cursor **cursor) {
 static Nan::Persistent<v8::FunctionTemplate> database_constructor;
 
 NAN_METHOD(NLMDB) {
-  Nan::HandleScope scope;
-
   v8::Local<v8::String> location;
   if (info.Length() != 0 && info[0]->IsString())
     location = info[0].As<v8::String>();
@@ -275,8 +273,6 @@ NAN_METHOD(NLMDB) {
 }
 
 void Database::Init () {
-//  Nan::HandleScope scope;
-
   v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(Database::New);
   database_constructor.Reset(tpl);
   tpl->SetClassName(Nan::New("Database").ToLocalChecked());
@@ -299,8 +295,6 @@ void Database::Init () {
 }
 
 NAN_METHOD(Database::New) {
-//  Nan::HandleScope scope;
-
   if (info.Length() == 0) {
     return Nan::ThrowError("constructor requires at least a location argument");
   }
@@ -339,8 +333,6 @@ v8::Local<v8::Value> Database::NewInstance (v8::Local<v8::String> &location) {
 }
 
 NAN_METHOD(Database::Open) {
-  Nan::HandleScope scope;
-
   NL_METHOD_SETUP_COMMON(open, 0, 1)
 
   OpenOptions options;
@@ -414,8 +406,6 @@ NAN_METHOD(Database::Open) {
 }
 
 /*NAN_METHOD(Database::OpenSync) {
-  Nan::HandleScope scope;
-
   NL_METHOD_SETUP_SYNC(openSync,0)
 
   OpenOptions options;
@@ -479,8 +469,6 @@ NAN_METHOD(Database::Open) {
 }
 */
 NAN_METHOD(Database::Close) {
-  Nan::HandleScope scope;
-
   NL_METHOD_SETUP_COMMON_ONEARG(close)
 
   CloseWorker* worker = new CloseWorker(
@@ -535,8 +523,6 @@ NAN_METHOD(Database::Close) {
 }
 
 /*NAN_METHOD(Database::CloseSync) {
-  Nan::HandleScope scope;
-
   NL_METHOD_SETUP_SYNC(closeSync,-1)
 
   if (database->iterators.size() > 0) {
@@ -561,8 +547,6 @@ NAN_METHOD(Database::Close) {
 */
 
 NAN_METHOD(Database::Put) {
-  Nan::HandleScope scope;
-
   NL_METHOD_SETUP_COMMON(put, 2, 3)
 
   NL_CB_ERR_IF_NULL_OR_UNDEFINED(info[0], key)
@@ -594,8 +578,6 @@ NAN_METHOD(Database::Put) {
 }
 
 /*NAN_METHOD(Database::PutSync) {
-  Nan::HandleScope scope;
-
   NL_METHOD_SETUP_SYNC(putSync, 2)
 
   v8::Local<v8::Object> keyHandle = info[0].As<v8::Object>();
@@ -617,8 +599,6 @@ NAN_METHOD(Database::Put) {
 }
 */
 NAN_METHOD(Database::Get) {
-//  Nan::HandleScope scope;
-
   NL_METHOD_SETUP_COMMON(get, 1, 2)
 
   NL_CB_ERR_IF_NULL_OR_UNDEFINED(info[0], key)
@@ -644,8 +624,6 @@ NAN_METHOD(Database::Get) {
 }
 
 /*NAN_METHOD(Database::GetSync) {
-  Nan::HandleScope scope;
-
   NL_METHOD_SETUP_SYNC(getSync, 1)
 
   v8::Local<v8::Object> keyHandle = info[0].As<v8::Object>();
@@ -671,8 +649,6 @@ NAN_METHOD(Database::Get) {
 }
 */
 NAN_METHOD(Database::Delete) {
-  Nan::HandleScope scope;
-
   NL_METHOD_SETUP_COMMON(del, 1, 2)
 
   NL_CB_ERR_IF_NULL_OR_UNDEFINED(info[0], key)
@@ -697,8 +673,6 @@ NAN_METHOD(Database::Delete) {
 }
 /*
 NAN_METHOD(Database::DeleteSync) {
-  Nan::HandleScope scope;
-
   NL_METHOD_SETUP_SYNC(deleteSync, 1)
 
   v8::Local<v8::Object> keyHandle = info[0].As<v8::Object>();
@@ -717,8 +691,6 @@ NAN_METHOD(Database::DeleteSync) {
 */
 
 NAN_METHOD(Database::Batch) {
-//  Nan::HandleScope scope;
-
   if ((info.Length() == 0 || info.Length() == 1) && !info[0]->IsArray()) {
     v8::Local<v8::Object> optionsObj;
     if (info.Length() > 0 && info[0]->IsObject()) {
@@ -763,8 +735,6 @@ NAN_METHOD(Database::Batch) {
 }
 
 NAN_METHOD(Database::Iterator) {
-  Nan::HandleScope scope;
-
   Database* database = Nan::ObjectWrap::Unwrap<Database>(info.This());
 
   v8::Local<v8::Object> optionsObj;

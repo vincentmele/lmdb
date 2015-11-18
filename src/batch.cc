@@ -12,7 +12,6 @@
 namespace nlmdb {
 
 BatchOp::BatchOp (v8::Local<v8::Object> &keyHandle, MDB_val key) : key(key) {
-  Nan::HandleScope scope;
 
   v8::Local<v8::Object> obj = Nan::New<v8::Object>();
   obj->Set(Nan::New("key").ToLocalChecked(), keyHandle);
@@ -20,7 +19,6 @@ BatchOp::BatchOp (v8::Local<v8::Object> &keyHandle, MDB_val key) : key(key) {
 }
 
 BatchOp::~BatchOp () {
-  Nan::HandleScope scope;
 
   v8::Local<v8::Object> handle = Nan::New(persistentHandle);
   v8::Local<v8::Object> keyHandle =
@@ -53,8 +51,6 @@ BatchPut::BatchPut (
 }
 
 BatchPut::~BatchPut () {
-  Nan::HandleScope scope;
-
   v8::Local<v8::Object> handle = Nan::New(persistentHandle);
   v8::Local<v8::Object> valueHandle =
       handle->Get(Nan::New("value").ToLocalChecked()).As<v8::Object>();
@@ -77,8 +73,6 @@ WriteBatch::~WriteBatch () {
 }
 
 void WriteBatch::Write (v8::Local<v8::Function> callback) {
-  Nan::HandleScope scope;
-
   written = true;
 
   if (operations->size() > 0) {
@@ -117,8 +111,6 @@ void WriteBatch::Clear () {
 static Nan::Persistent<v8::FunctionTemplate> writebatch_constructor;
 
 void WriteBatch::Init () {
-  Nan::HandleScope scope;
-
   v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(WriteBatch::New);
   writebatch_constructor.Reset(tpl);
   tpl->SetClassName(Nan::New("Batch").ToLocalChecked());
@@ -130,8 +122,6 @@ void WriteBatch::Init () {
 }
 
 NAN_METHOD(WriteBatch::New) {
-  Nan::HandleScope scope;
-
   Database* database = Nan::ObjectWrap::Unwrap<Database>(info[0]->ToObject());
   v8::Local<v8::Object> optionsObj;
 
@@ -169,8 +159,6 @@ v8::Local<v8::Value> WriteBatch::NewInstance (
 }
 
 NAN_METHOD(WriteBatch::Put) {
-  Nan::HandleScope scope;
-
   WriteBatch* batch = Nan::ObjectWrap::Unwrap<WriteBatch>(info.Holder());
 
   if (batch->written) {
@@ -193,8 +181,6 @@ NAN_METHOD(WriteBatch::Put) {
 }
 
 NAN_METHOD(WriteBatch::Del) {
-  Nan::HandleScope scope;
-
   WriteBatch* batch = Nan::ObjectWrap::Unwrap<WriteBatch>(info.Holder());
 
   if (batch->written) {
@@ -214,8 +200,6 @@ NAN_METHOD(WriteBatch::Del) {
 }
 
 NAN_METHOD(WriteBatch::Clear) {
-  Nan::HandleScope scope;
-
   WriteBatch* batch = Nan::ObjectWrap::Unwrap<WriteBatch>(info.Holder());
 
   if (batch->written) {
@@ -228,8 +212,6 @@ NAN_METHOD(WriteBatch::Clear) {
 }
 
 NAN_METHOD(WriteBatch::Write) {
-  Nan::HandleScope scope;
-
   WriteBatch* batch = Nan::ObjectWrap::Unwrap<WriteBatch>(info.Holder());
 
   if (info.Length() == 0 || !info[0]->IsFunction()) {

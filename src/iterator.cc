@@ -167,8 +167,6 @@ void checkEndCallback (Iterator* iterator) {
 }
 
 NAN_METHOD(Iterator::Next) {
-//  Nan::HandleScope scope;
-
   Iterator* iterator = Nan::ObjectWrap::Unwrap<Iterator>(info.This());
 
   if (info.Length() == 0 || !info[0]->IsFunction()) {
@@ -197,8 +195,6 @@ NAN_METHOD(Iterator::Next) {
 }
 
 NAN_METHOD(Iterator::NextSync) {
-//  Nan::HandleScope scope;
-
   Iterator* iterator = Nan::ObjectWrap::Unwrap<Iterator>(info.This());
 
   if (iterator->ended) {
@@ -226,8 +222,6 @@ NAN_METHOD(Iterator::NextSync) {
 }
 
 NAN_METHOD(Iterator::KeySync) {
-//  Nan::HandleScope scope;
-
   Iterator* iterator = Nan::ObjectWrap::Unwrap<Iterator>(info.This());
 
   if (iterator->ended) {
@@ -255,8 +249,6 @@ NAN_METHOD(Iterator::KeySync) {
 }
 
 NAN_METHOD(Iterator::ValSync) {
-//  Nan::HandleScope scope;
-
   Iterator* iterator = Nan::ObjectWrap::Unwrap<Iterator>(info.This());
 
   if (iterator->ended) {
@@ -284,8 +276,6 @@ NAN_METHOD(Iterator::ValSync) {
 }
 
 NAN_METHOD(Iterator::End) {
-//  Nan::HandleScope scope;
-
   Iterator* iterator = Nan::ObjectWrap::Unwrap<Iterator>(info.This());
   //std::cerr << "Iterator::End" << iterator->id << ", " << iterator->nexting << ", " << iterator->ended << std::endl;
 
@@ -318,8 +308,6 @@ NAN_METHOD(Iterator::End) {
 }
 
 NAN_METHOD(Iterator::EndSync) {
-//  Nan::HandleScope scope;
-
   Iterator* iterator = Nan::ObjectWrap::Unwrap<Iterator>(info.This());
   //std::cerr << "Iterator::End" << iterator->id << ", " << iterator->nexting << ", " << iterator->ended << std::endl;
 

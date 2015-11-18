@@ -137,7 +137,6 @@ static inline void DisposeStringOrBufferFromMDVal(
       v8::Local<v8::Value> handle
     , MDB_val val) {
 
-  Nan::HandleScope scope;
   if (!node::Buffer::HasInstance(handle))
     delete[] (char*)val.mv_data;
 }
