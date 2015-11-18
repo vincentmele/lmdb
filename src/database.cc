@@ -275,7 +275,7 @@ NAN_METHOD(NLMDB) {
 }
 
 void Database::Init () {
-  Nan::HandleScope scope;
+//  Nan::HandleScope scope;
 
   v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(Database::New);
   database_constructor.Reset(tpl);
@@ -299,7 +299,7 @@ void Database::Init () {
 }
 
 NAN_METHOD(Database::New) {
-  Nan::HandleScope scope;
+//  Nan::HandleScope scope;
 
   if (info.Length() == 0) {
     return Nan::ThrowError("constructor requires at least a location argument");
@@ -317,7 +317,7 @@ NAN_METHOD(Database::New) {
   info.GetReturnValue().Set(info.This());
 }
 
-v8::Handle<v8::Value> Database::NewInstance (v8::Local<v8::String> &location) {
+v8::Local<v8::Value> Database::NewInstance (v8::Local<v8::String> &location) {
   Nan::EscapableHandleScope scope;
 
   v8::Local<v8::Object> instance;
@@ -325,13 +325,16 @@ v8::Handle<v8::Value> Database::NewInstance (v8::Local<v8::String> &location) {
   v8::Local<v8::FunctionTemplate> constructorHandle =
       Nan::New(database_constructor);
 
+  v8::Local<v8::Value> argv[] = { location };
+  instance = constructorHandle->GetFunction()->NewInstance(1,argv);
+/*
   if (location.IsEmpty()) {
     instance = constructorHandle->GetFunction()->NewInstance(0, NULL);
   } else {
     v8::Handle<v8::Value> argv[] = { location };
     instance = constructorHandle->GetFunction()->NewInstance(1, argv);
   }
-
+*/
   return scope.Escape(instance);
 }
 
@@ -614,7 +617,7 @@ NAN_METHOD(Database::Put) {
 }
 */
 NAN_METHOD(Database::Get) {
-  Nan::HandleScope scope;
+//  Nan::HandleScope scope;
 
   NL_METHOD_SETUP_COMMON(get, 1, 2)
 
@@ -622,8 +625,6 @@ NAN_METHOD(Database::Get) {
 
   v8::Local<v8::Object> keyHandle = info[0].As<v8::Object>();
   NL_STRING_OR_BUFFER_TO_MDVAL(key, keyHandle, key)
-
-  //std::cerr << "->GETFROMDB(" << (char*)key.mv_data << "(" << key.mv_size << ")" << std::endl;
 
   bool asBuffer = BooleanOptionValue(optionsObj, "asBuffer", true);
 
@@ -640,8 +641,6 @@ NAN_METHOD(Database::Get) {
   worker->SaveToPersistent("database", _this);
 
   Nan::AsyncQueueWorker(worker);
-
-  return;
 }
 
 /*NAN_METHOD(Database::GetSync) {
@@ -718,14 +717,15 @@ NAN_METHOD(Database::DeleteSync) {
 */
 
 NAN_METHOD(Database::Batch) {
-  Nan::HandleScope scope;
+//  Nan::HandleScope scope;
 
   if ((info.Length() == 0 || info.Length() == 1) && !info[0]->IsArray()) {
     v8::Local<v8::Object> optionsObj;
     if (info.Length() > 0 && info[0]->IsObject()) {
-      optionsObj = v8::Local<v8::Object>::Cast(info[0]);
+      optionsObj = info[0].As<v8::Object>();
     }
     info.GetReturnValue().Set(WriteBatch::NewInstance(info.This(), optionsObj));
+    return;
   }
 
   NL_METHOD_SETUP_COMMON(batch, 1, 2)
@@ -776,7 +776,7 @@ NAN_METHOD(Database::Iterator) {
   // easily store & lookup on our `iterators` map
   uint32_t id = database->currentIteratorId++;
   Nan::TryCatch try_catch;
-  v8::Handle<v8::Object> iteratorHandle = Iterator::NewInstance(
+  v8::Local<v8::Object> iteratorHandle = Iterator::NewInstance(
       info.This()
     , Nan::New(id)
     , optionsObj

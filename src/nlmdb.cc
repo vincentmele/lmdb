@@ -9,7 +9,7 @@
 
 namespace nlmdb {
 
-void Init (v8::Handle<v8::Object> target) {
+void Init (v8::Local<v8::Object> target) {
   Nan::HandleScope scope;
   Database::Init();
   WriteBatch::Init();

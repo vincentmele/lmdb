@@ -54,7 +54,7 @@ NAN_METHOD(NLMDB);
 class Database : public Nan::ObjectWrap {
 public:
   static void Init ();
-  static v8::Handle<v8::Value> NewInstance (v8::Local<v8::String> &location);
+  static v8::Local<v8::Value> NewInstance (v8::Local<v8::String> &location);
 
   md_status OpenDatabase (OpenOptions options);
   void CloseDatabase     ();

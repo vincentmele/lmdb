@@ -37,7 +37,7 @@ static inline bool BooleanOptionValue(
         const char* _key,
         bool def = false) {
 
-  v8::Handle<v8::String> key = Nan::New(_key).ToLocalChecked();
+  v8::Local<v8::String> key = Nan::New(_key).ToLocalChecked();
   return !options.IsEmpty()
     && options->Has(key)
     ? options->Get(key)->BooleanValue()
@@ -46,7 +46,7 @@ static inline bool BooleanOptionValue(
 
 static inline bool BooleanOptionValueDefTrue(
       v8::Local<v8::Object> optionsObj
-    , v8::Handle<v8::String> opt) {
+    , v8::Local<v8::String> opt) {
 
   return optionsObj.IsEmpty()
     || !optionsObj->Has(opt)
@@ -56,7 +56,7 @@ static inline bool BooleanOptionValueDefTrue(
 static inline uint32_t UInt32OptionValue(v8::Local<v8::Object> options,
                                       const char* _key,
                                       uint32_t def) {
-  v8::Handle<v8::String> key = Nan::New(_key).ToLocalChecked();
+  v8::Local<v8::String> key = Nan::New(_key).ToLocalChecked();
   return !options.IsEmpty()
     && options->Has(key)
     && options->Get(key)->IsNumber()
@@ -68,7 +68,7 @@ static inline uint32_t UInt32OptionValue(v8::Local<v8::Object> options,
 
 static inline uint64_t UInt64OptionValue(
       v8::Local<v8::Object> optionsObj
-    , v8::Handle<v8::String> opt
+    , v8::Local<v8::String> opt
     , uint64_t def) {
 
   return !optionsObj.IsEmpty()

@@ -167,7 +167,7 @@ void checkEndCallback (Iterator* iterator) {
 }
 
 NAN_METHOD(Iterator::Next) {
-  Nan::HandleScope scope;
+//  Nan::HandleScope scope;
 
   Iterator* iterator = Nan::ObjectWrap::Unwrap<Iterator>(info.This());
 
@@ -197,7 +197,7 @@ NAN_METHOD(Iterator::Next) {
 }
 
 NAN_METHOD(Iterator::NextSync) {
-  Nan::HandleScope scope;
+//  Nan::HandleScope scope;
 
   Iterator* iterator = Nan::ObjectWrap::Unwrap<Iterator>(info.This());
 
@@ -226,7 +226,7 @@ NAN_METHOD(Iterator::NextSync) {
 }
 
 NAN_METHOD(Iterator::KeySync) {
-  Nan::HandleScope scope;
+//  Nan::HandleScope scope;
 
   Iterator* iterator = Nan::ObjectWrap::Unwrap<Iterator>(info.This());
 
@@ -255,7 +255,7 @@ NAN_METHOD(Iterator::KeySync) {
 }
 
 NAN_METHOD(Iterator::ValSync) {
-  Nan::HandleScope scope;
+//  Nan::HandleScope scope;
 
   Iterator* iterator = Nan::ObjectWrap::Unwrap<Iterator>(info.This());
 
@@ -284,7 +284,7 @@ NAN_METHOD(Iterator::ValSync) {
 }
 
 NAN_METHOD(Iterator::End) {
-  Nan::HandleScope scope;
+//  Nan::HandleScope scope;
 
   Iterator* iterator = Nan::ObjectWrap::Unwrap<Iterator>(info.This());
   //std::cerr << "Iterator::End" << iterator->id << ", " << iterator->nexting << ", " << iterator->ended << std::endl;
@@ -318,7 +318,7 @@ NAN_METHOD(Iterator::End) {
 }
 
 NAN_METHOD(Iterator::EndSync) {
-  Nan::HandleScope scope;
+//  Nan::HandleScope scope;
 
   Iterator* iterator = Nan::ObjectWrap::Unwrap<Iterator>(info.This());
   //std::cerr << "Iterator::End" << iterator->id << ", " << iterator->nexting << ", " << iterator->ended << std::endl;
@@ -368,13 +368,13 @@ v8::Local<v8::Object> Iterator::NewInstance (
   v8::Local<v8::Object> instance;
 
   v8::Local<v8::FunctionTemplate> constructorHandle =
-      Nan::New(iterator_constructor);
+      Nan::New<v8::FunctionTemplate>(iterator_constructor);
 
   if (optionsObj.IsEmpty()) {
-    v8::Local<v8::Value> argv[] = { database, id };
+    v8::Local<v8::Value> argv[2] = { database, id };
     instance = constructorHandle->GetFunction()->NewInstance(2, argv);
   } else {
-    v8::Local<v8::Value> argv[] = { database, id, optionsObj };
+    v8::Local<v8::Value> argv[3] = { database, id, optionsObj };
     instance = constructorHandle->GetFunction()->NewInstance(3, argv);
   }
 
@@ -386,7 +386,7 @@ NAN_METHOD(Iterator::New) {
   Database* database = Nan::ObjectWrap::Unwrap<Database>(info[0]->ToObject());
 
   //TODO: remove this, it's only here to make NL_STRING_OR_BUFFER_TO_MDVAL happy
-  v8::Handle<v8::Function> callback;
+  v8::Local<v8::Function> callback;
 
   std::string* start = NULL;
   std::string* end = NULL;
